@@ -1,3 +1,4 @@
+# to run: py live_qLearning.py --watch-training
 from __future__ import annotations
 
 import argparse

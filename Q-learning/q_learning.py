@@ -1,3 +1,4 @@
+# to run: py q_learning.py
 from __future__ import annotations
 
 import argparse
