@@ -30,10 +30,10 @@ DEFAULTS = dict(
     epsilon_start=1.0,
     epsilon_end=0.10,
     epsilon_decay=500_000,
-    n_episodes=5000,
-    max_steps=600,
+    n_episodes=2000,
+    max_steps=300,
     maze_seed=42,
-    log_every=200,
+    log_every=100,
     save_path=os.path.join(_HERE, "results", "q_table.pkl"),
 )
 

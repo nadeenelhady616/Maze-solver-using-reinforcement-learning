@@ -22,7 +22,7 @@ from maze_env import MazeEnv
 
 DEFAULTS = dict(
     maze_size=(8, 8),
-    maze_type="dfs",
+    maze_type="prim",
     reward_type="potential",
     alpha=0.05,
     gamma=0.99,
@@ -30,9 +30,9 @@ DEFAULTS = dict(
     epsilon_end=0.10,
     epsilon_decay=500_000,
     n_episodes=2000,
-    max_steps=600,
+    max_steps=300,
     maze_seed=42,
-    log_every=200,
+    log_every=100,
     watch_training=False,
     watch_every=50,
 )
