@@ -19,6 +19,9 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
+import sys
+sys.setrecursionlimit(100000)
+
 
 # ===========================================================================
 # PART 1 — DIRECTIONS
@@ -411,10 +414,13 @@ class MazeEnv(gym.Env):
         d = self._action_to_dir[int(action)]
         prev_r, prev_c = self._agent_pos
 
+        moved = False  # Track if agent actually moved
+
         # Move the agent (only if no wall is blocking)
         if self._grid.can_move(prev_r, prev_c, d):
             dr, dc = _DELTA[d]
             self._agent_pos = (prev_r + dr, prev_c + dc)
+            moved = True
         # If movement is blocked, agent stays in place
         # (this is intentional — hitting walls is a valid action result)
 
@@ -428,7 +434,9 @@ class MazeEnv(gym.Env):
             self._goal_idx += 1
             if self._goal_idx >= len(self._goals):
                 terminated = True      # all goals reached → episode ends
-                reward += 1.0          # bonus reward for completing the maze
+                reward += 10.0         # Big bonus for completing the maze
+            else:
+                reward += 5.0          # Bonus for reaching intermediate goal
 
         self._step_count += 1
         truncated = (not terminated) and (self._step_count >= self.max_steps)
@@ -537,14 +545,21 @@ class MazeEnv(gym.Env):
         goal_idx = min(self._goal_idx, len(self._goals) - 1)
         gr, gc   = self._goals[goal_idx]
         r, c     = self._agent_pos
-
+        
+        if (r, c) == (gr, gc):
+            return 5.0  # Big reward for reaching goal
+        if (r, c) == (prev_r, prev_c):
+            return -0.5  # Penalty for hitting wall
         if self.reward_type == "sparse":
-            return 0.0
+            return  -0.05 
 
         elif self.reward_type == "dense":
             prev_dist = abs(prev_r - gr) + abs(prev_c - gc)
             curr_dist = abs(r - gr)      + abs(c - gc)
-            return float(prev_dist - curr_dist)   # positive = got closer
+            diff = prev_dist - curr_dist
+            if curr_dist <= 2:
+               diff += 0.5
+            return float(diff * 2.0)   # Multiply by 2 to make signal stronger
 
         elif self.reward_type == "potential":
             norm     = self.maze_rows + self.maze_cols
@@ -553,7 +568,7 @@ class MazeEnv(gym.Env):
             gamma    = 0.99
             return float(gamma * curr_phi - prev_phi)
 
-        return 0.0
+        return -0.05  # default small reward
 
     def _render_image(self) -> np.ndarray:
         """Build an RGB image of the current maze state for display."""
@@ -589,3 +604,4 @@ class MazeEnv(gym.Env):
         """Return a copy of the maze grid (useful for BFS oracle)."""
         assert self._grid is not None, "Call reset() first."
         return self._grid.clone()
+    
